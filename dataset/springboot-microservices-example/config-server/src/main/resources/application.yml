@@ -1,0 +1,27 @@
+server:
+  port: 9296
+
+spring:
+  application:
+    name: config-server
+#  cloud:
+#    config:
+#      server:
+#        git:
+#          uri: https://github.com/cevheri/microservices-config-server
+#          clone-on-start: true
+#          searchPaths: licensingservice,organizationservice
+#      username: native-cloud-apps
+#      password: 0ffended
+
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      # for local run
+      # defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://service-registry:8761/eureka/
+  instance:
+    hostname: service-registry

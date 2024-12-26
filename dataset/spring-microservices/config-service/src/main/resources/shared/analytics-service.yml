@@ -1,0 +1,78 @@
+spring:
+  zipkin:
+    baseUrl: http://localhost:9411/
+    sender:
+      type: kafka
+  sleuth:
+    sampler:
+      probability: 1.0
+
+server:
+  port: 8309
+
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://localhost:8302/eureka
+  instance:
+    hostname: localhost
+
+security:
+  oauth2:
+    client:
+      clientId: analytics-service
+      clientSecret: ${ANALYTICS_SERVICE_PASSWORD}
+      accessTokenUri: http://localhost:9000/api/auth/oauth/token
+      grant-type: client_credentials
+      scope: server
+    resource:
+      userInfoUri: http://localhost:9000/api/auth/user/details
+
+feign:
+  hystrix:
+    enabled:  true
+
+hystrix:
+  shareSecurityContext: true
+  command:
+    default:
+      execution:
+        isolation:
+          strategy: SEMAPHORE
+          thread:
+            timeoutInMilliseconds: 60000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream,info,health
+
+sample:
+  zipkin:
+    # When enabled=false, traces log to the console. When enabled=true traces send to zipkin
+    enabled: true
+
+---
+spring:
+  profiles: production
+  zipkin:
+    baseUrl: http://zipkin-service:9411/
+  kafka:
+    bootstrap-servers: kafka-broker:9092
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-service:8302/eureka
+  instance:
+    preferIpAddress: true
+
+security:
+  oauth2:
+    client:
+      accessTokenUri: http://gateway-service:9000/api/auth/oauth/token
+    resource:
+      userInfoUri: http://gateway-service:9000/api/auth/user/details

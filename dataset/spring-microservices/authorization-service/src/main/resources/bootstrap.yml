@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: authorization-service
+  cloud:
+    config:
+      uri: http://localhost:8888
+      fail-fast: true
+      username: user
+      password: ${CONFIG_SERVICE_PASSWORD}
+
+logstash:
+  host: localhost
+
+---
+spring:
+  profiles: production
+  cloud:
+    config:
+      uri: http://config-service:8888
+
+logstash:
+  host: elastic-stack

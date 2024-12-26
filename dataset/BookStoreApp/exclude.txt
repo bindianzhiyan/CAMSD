@@ -1,0 +1,9 @@
+bookstore-commons
+bookstore-feign
+bookstore-frontend-react-app
+bookstore-graphana
+bookstore-prometheus
+bookstore-telegraph
+images
+Postman
+deployment

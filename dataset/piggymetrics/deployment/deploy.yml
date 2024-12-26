@@ -1,0 +1,358 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config
+  template:
+    metadata:
+      labels:
+        app: config
+    spec:
+      containers:
+        - name: config
+          image: sqshq/piggymetrics-config
+          env:
+            - name: CONFIG_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: config-secret
+                  key: CONFIG_SERVICE_PASSWORD
+          ports:
+            - containerPort: 8888
+          volumeMounts:
+            - name: config-data
+              mountPath: /config
+      volumes:
+        - name: config-data
+          emptyDir: { }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: config
+spec:
+  ports:
+    - protocol: TCP
+      port: 8888
+      targetPort: 8888
+  selector:
+    app: config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: registry
+  template:
+    metadata:
+      labels:
+        app: registry
+    spec:
+      containers:
+        - name: registry
+          image: sqshq/piggymetrics-registry
+          env:
+            - name: CONFIG_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: config-secret
+                  key: CONFIG_SERVICE_PASSWORD
+          ports:
+            - containerPort: 8761
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+spec:
+  ports:
+    - protocol: TCP
+      port: 8761
+      targetPort: 8761
+  selector:
+    app: registry
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+        - name: gateway
+          image: sqshq/piggymetrics-gateway
+          env:
+            - name: CONFIG_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: config-secret
+                  key: CONFIG_SERVICE_PASSWORD
+          ports:
+            - containerPort: 4000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 4000
+  selector:
+    app: gateway
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: sqshq/piggymetrics-auth-service
+          env:
+            - name: CONFIG_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: config-secret
+                  key: CONFIG_SERVICE_PASSWORD
+            - name: NOTIFICATION_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secret
+                  key: NOTIFICATION_SERVICE_PASSWORD
+            - name: STATISTICS_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: statistics-secret
+                  key: STATISTICS_SERVICE_PASSWORD
+            - name: ACCOUNT_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: account-secret
+                  key: ACCOUNT_SERVICE_PASSWORD
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: MONGODB_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  selector:
+    app: auth-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: account-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: account-service
+  template:
+    metadata:
+      labels:
+        app: account-service
+    spec:
+      containers:
+        - name: account-service
+          image: sqshq/piggymetrics-account-service
+          env:
+            - name: CONFIG_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: config-secret
+                  key: CONFIG_SERVICE_PASSWORD
+            - name: ACCOUNT_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: account-secret
+                  key: ACCOUNT_SERVICE_PASSWORD
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: MONGODB_PASSWORD
+          ports:
+            - containerPort: 6000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: account-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 6000
+      targetPort: 6000
+  selector:
+    app: account-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: statistics-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: statistics-service
+  template:
+    metadata:
+      labels:
+        app: statistics-service
+    spec:
+      containers:
+        - name: statistics-service
+          image: sqshq/piggymetrics-statistics-service
+          env:
+            - name: CONFIG_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: config-secret
+                  key: CONFIG_SERVICE_PASSWORD
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: MONGODB_PASSWORD
+            - name: STATISTICS_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: statistics-secret
+                  key: STATISTICS_SERVICE_PASSWORD
+          ports:
+            - containerPort: 7000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: statistics-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 7000
+      targetPort: 7000
+  selector:
+    app: statistics-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+        - name: notification-service
+          image: sqshq/piggymetrics-notification-service
+          env:
+            - name: CONFIG_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: config-secret
+                  key: CONFIG_SERVICE_PASSWORD
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: MONGODB_PASSWORD
+            - name: NOTIFICATION_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secret
+                  key: NOTIFICATION_SERVICE_PASSWORD
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  selector:
+    app: notification-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: turbine-stream-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: turbine-stream-service
+  template:
+    metadata:
+      labels:
+        app: turbine-stream-service
+    spec:
+      containers:
+        - name: turbine-stream-service
+          image: sqshq/piggymetrics-turbine-stream-service
+          env:
+            - name: CONFIG_SERVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: config-secret
+                  key: CONFIG_SERVICE_PASSWORD
+          ports:
+            - containerPort: 8989
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: turbine-stream-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 8989
+      targetPort: 8989
+  selector:
+    app: turbine-stream-service
+

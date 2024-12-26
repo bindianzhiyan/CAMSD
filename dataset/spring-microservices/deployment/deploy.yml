@@ -1,0 +1,300 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-service
+  template:
+    metadata:
+      labels:
+        app: config-service
+    spec:
+      containers:
+      - name: config-service
+        image: config-service # replace with the actual image name
+        env:
+        - name: CONFIG_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: config-service-secrets
+              key: CONFIG_SERVICE_PASSWORD
+        - name: CONFIG_KEYSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: config-service-secrets
+              key: CONFIG_KEYSTORE_PASSWORD
+        - name: CONFIG_KEY_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: config-service-secrets
+              key: CONFIG_KEY_PASSWORD
+        ports:
+        - containerPort: 8888
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-service
+spec:
+  selector:
+    app: config-service
+  ports:
+    - protocol: TCP
+      port: 8888
+      targetPort: 8888
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discovery-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discovery-service
+  template:
+    metadata:
+      labels:
+        app: discovery-service
+    spec:
+      containers:
+      - name: discovery-service
+        image: discovery-service # replace with the actual image name
+        env:
+        - name: CONFIG_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: config-service-secrets
+              key: CONFIG_SERVICE_PASSWORD
+        ports:
+        - containerPort: 8302
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: discovery-service
+spec:
+  selector:
+    app: discovery-service
+  ports:
+    - protocol: TCP
+      port: 8302
+      targetPort: 8302
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authorization-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authorization-service
+  template:
+    metadata:
+      labels:
+        app: authorization-service
+    spec:
+      containers:
+      - name: authorization-service
+        image: authorization-service # replace with the actual image name
+        env:
+        - name: AUTH_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: authorization-service-secrets
+              key: AUTH_SERVICE_PASSWORD
+        - name: FINANCE_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: authorization-service-secrets
+              key: FINANCE_SERVICE_PASSWORD
+        - name: ANALYTICS_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: authorization-service-secrets
+              key: ANALYTICS_SERVICE_PASSWORD
+        - name: CONFIG_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: authorization-service-secrets
+              key: CONFIG_SERVICE_PASSWORD
+        ports:
+        - containerPort: 1000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authorization-service
+spec:
+  selector:
+    app: authorization-service
+  ports:
+    - protocol: TCP
+      port: 1000
+      targetPort: 1000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: finance-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: finance-service
+  template:
+    metadata:
+      labels:
+        app: finance-service
+    spec:
+      containers:
+      - name: finance-service
+        image: finance-service # replace with the actual image name
+        env:
+        - name: CONFIG_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: finance-service-secrets
+              key: CONFIG_SERVICE_PASSWORD
+        - name: FINANCE_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: finance-service-secrets
+              key: FINANCE_SERVICE_PASSWORD
+        ports:
+        - containerPort: 8301
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: finance-service
+spec:
+  selector:
+    app: finance-service
+  ports:
+    - protocol: TCP
+      port: 8301
+      targetPort: 8301
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-service
+  template:
+    metadata:
+      labels:
+        app: analytics-service
+    spec:
+      containers:
+      - name: analytics-service
+        image: analytics-service # replace with the actual image name
+        env:
+        - name: CONFIG_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: analytics-service-secrets
+              key: CONFIG_SERVICE_PASSWORD
+        - name: ANALYTICS_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: analytics-service-secrets
+              key: ANALYTICS_SERVICE_PASSWORD
+        ports:
+        - containerPort: 8309
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-service
+spec:
+  selector:
+    app: analytics-service
+  ports:
+    - protocol: TCP
+      port: 8309
+      targetPort: 8309
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-service
+  template:
+    metadata:
+      labels:
+        app: gateway-service
+    spec:
+      containers:
+      - name: gateway-service
+        image: gateway-service # replace with the actual image name
+        env:
+        - name: CONFIG_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: gateway-service-secrets
+              key: CONFIG_SERVICE_PASSWORD
+        ports:
+        - containerPort: 9000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-service
+spec:
+  selector:
+    app: gateway-service
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-service
+  template:
+    metadata:
+      labels:
+        app: data-service
+    spec:
+      containers:
+      - name: data-service
+        image: data-service # replace with the actual image name
+        env:
+        - name: CONFIG_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: data-service-secrets
+              key: CONFIG_SERVICE_PASSWORD
+        ports:
+        - containerPort: 8300
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-service
+spec:
+  selector:
+    app: data-service
+  ports:
+    - protocol: TCP
+      port: 8300
+      targetPort: 8300

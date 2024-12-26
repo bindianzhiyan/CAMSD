@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    run: catalog
+  name: microservice-kubernetes-demo-catalog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: catalog
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: catalog
+    spec:
+      containers:
+      - image: docker.io/ewolff/microservice-kubernetes-demo-catalog:latest
+        name: catalog
+        ports:
+        - containerPort: 8080
+        resources: {}
+status: {}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    run: customer
+  name: microservice-kubernetes-demo-customer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: customer
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: customer
+    spec:
+      containers:
+      - image: docker.io/ewolff/microservice-kubernetes-demo-customer:latest
+        name: customer
+        ports:
+        - containerPort: 8080
+        resources: {}
+status: {}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    run: order
+  name: microservice-kubernetes-demo-order
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: order
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: order
+    spec:
+      containers:
+      - image: docker.io/ewolff/microservice-kubernetes-demo-order:latest
+        name: order
+        ports:
+        - containerPort: 8080
+        resources: {}
+status: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    run: catalog
+  name: microservice-kubernetes-demo-catalog
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    run: catalog
+  type: LoadBalancer
+status:
+  loadBalancer: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    run: customer
+  name: microservice-kubernetes-demo-customer
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    run: customer
+  type: LoadBalancer
+status:
+  loadBalancer: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    run: order
+  name: microservice-kubernetes-demo-order
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    run: order
+  type: LoadBalancer
+status:
+  loadBalancer: {}
